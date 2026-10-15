@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Tour-du-monde</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Caveat:wght@600;700&family=Noto+Color+Emoji&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --canvas: #46688c;
+            --ink: #1d2330;
+            --paper: #fbfaf6;
+            --tape: #f3c63d;
+            --on: #f6f8fb;
+            --mut: rgba(246, 248, 251, 0.8);
+            --line: rgba(255, 255, 255, 0.5);
+            color-scheme: light;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --canvas: #1f3144;
+                color-scheme: dark;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --canvas: #1f3144;
+            color-scheme: dark;
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--on);
+            font:
+                16px/1.45 "Bricolage Grotesque",
+                system-ui,
+                sans-serif;
+            background:
+                repeating-linear-gradient(45deg,
+                    rgba(255, 255, 255, 0.04) 0 1px,
+                    transparent 1px 4px),
+                repeating-linear-gradient(-45deg,
+                    rgba(0, 0, 0, 0.07) 0 1px,
+                    transparent 1px 4px),
+                var(--canvas);
+        }
+
+        button {
+            font: inherit;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--tape);
+            outline-offset: 3px;
+        }
+
+        .fl {
+            font-family:
+                "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+        }
+
+        .hw {
+            font-family: Caveat, "Segoe Print", "Bradley Hand", cursive;
+            font-weight: 700;
+        }
+
+        .big {
+            font-size: 30px;
+            line-height: 1;
+        }
+
+        .sm {
+            font-size: 14px;
+            opacity: 0.75;
+            font-weight: 500;
+        }
+
+        .sk {
+            display: inline-block;
+            line-height: 1;
+            transform: rotate(var(--r, 0deg));
+            filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4));
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 22px 16px 40px;
+        }
+
+        .hd {
+            display: flex;
+            gap: 28px;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: clamp(44px, 10vw, 88px);
+            font-weight: 800;
+            line-height: 0.92;
+            letter-spacing: -0.035em;
+            margin: 0;
+            font-variation-settings: "opsz" 96;
+        }
+
+        .hd p {
+            max-width: 30ch;
+            margin: 14px 0 0;
+            font-size: 18px;
+            color: var(--mut);
+        }
+
+        #me {
+            filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.4));
+            transform: rotate(2deg);
+            width: min(100%, 290px);
+        }
+
+        .tag {
+            position: relative;
+            background: var(--paper);
+            color: var(--ink);
+            padding: 42px 18px 16px;
+            clip-path: polygon(14% 0, 86% 0, 100% 14%, 100% 100%, 0 100%, 0 14%);
+        }
+
+        .tag::before {
+            content: "";
+            position: absolute;
+            top: 13px;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin-left: -8px;
+            border-radius: 50%;
+            background: var(--canvas);
+            box-shadow:
+                inset 0 2px 3px rgba(0, 0, 0, 0.55),
+                0 0 0 3px #d9d2bf;
+        }
+
+        .r1 {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 26px 0 16px;
+        }
+
+        .tape,
+        .tab,
+        .join {
+            clip-path: polygon(2% 0,
+                    98% 0,
+                    100% 12%,
+                    98% 25%,
+                    100% 38%,
+                    98% 50%,
+                    100% 62%,
+                    98% 75%,
+                    100% 88%,
+                    98% 100%,
+                    2% 100%,
+                    0 88%,
+                    2% 75%,
+                    0 62%,
+                    2% 50%,
+                    0 38%,
+                    2% 25%,
+                    0 12%);
+        }
+
+        .tab {
+            border: 0;
+            padding: 12px 22px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .tab.on {
+            background: var(--tape);
+            color: var(--ink);
+        }
+
+        input[type="search"] {
+            width: 100%;
+            max-width: 460px;
+            padding: 13px 14px;
+            border: 0;
+            border-radius: 4px;
+            background: var(--paper);
+            color: var(--ink);
+            font: inherit;
+            box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.22);
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 14px 0 10px;
+        }
+
+        .chip {
+            white-space: nowrap;
+            background: none;
+            border: 1.5px solid var(--line);
+            border-radius: 3px;
+            padding: 6px 14px;
+        }
+
+        .chip.on {
+            background: var(--paper);
+            color: var(--ink);
+            border-color: var(--paper);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(98px, 1fr));
+            gap: 14px 4px;
+        }
+
+        .t {
+            position: relative;
+            background: none;
+            border: 0;
+            padding: 10px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .t .nm {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .t:not(.seen) .w {
+            filter: saturate(0.55);
+            opacity: 0.82;
+        }
+
+        .t.seen::after {
+            content: "";
+            position: absolute;
+            top: 8px;
+            left: calc(50% + 14px);
+            width: 24px;
+            height: 10px;
+            background: rgba(243, 198, 61, 0.92);
+            transform: rotate(38deg);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+        }
+
+        .t.mine .nm {
+            background: var(--tape);
+            color: var(--ink);
+            padding: 0 6px;
+            border-radius: 2px;
+            text-shadow: none;
+        }
+
+        .t:active .sk {
+            transform: rotate(var(--r, 0deg)) scale(0.92);
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #sh {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 14, 22, 0.7);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 9;
+        }
+
+        #sh.on {
+            display: flex;
+        }
+
+        .card {
+            position: relative;
+            background: var(--paper);
+            color: var(--ink);
+            width: 100%;
+            max-width: 520px;
+            max-height: 93vh;
+            overflow-y: auto;
+            padding: 22px 22px 26px;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+            animation: land 0.3s cubic-bezier(0.2, 0.8, 0.3, 1.15);
+        }
+
+        @keyframes land {
+            from {
+                transform: translateY(30px) rotate(1.5deg);
+                opacity: 0;
+            }
+        }
+
+        @media (min-width: 700px) {
+            #sh {
+                align-items: center;
+            }
+
+            .card {
+                border-radius: 4px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card {
+                animation: none;
+            }
+        }
+
+        #x {
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            border: 0;
+            background: none;
+            font-size: 30px;
+            line-height: 1;
+            padding: 4px 10px;
+            color: var(--ink);
+        }
+
+        .pol {
+            background: #fff;
+            padding: 12px 12px 10px;
+            width: min(250px, 72%);
+            margin: 4px auto 18px;
+            transform: rotate(-2.5deg);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
+        }
+
+        .pol .ph {
+            height: 150px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(#c3d4e2, #e8eef0);
+        }
+
+        .pol .fl {
+            font-size: 104px;
+            line-height: 1;
+            filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .pol b {
+            display: block;
+            text-align: center;
+            font-size: 34px;
+            line-height: 1;
+            margin-top: 8px;
+        }
+
+        .ln {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 14px;
+            padding: 9px 0;
+            border-bottom: 2px dotted #bdb7a8;
+        }
+
+        .ln span {
+            color: #5b6170;
+        }
+
+        .ln b {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-size: 18px;
+        }
+
+        .ln b.big {
+            font-size: 34px;
+            font-weight: 800;
+        }
+
+        .dy {
+            position: relative;
+            height: 10px;
+            border-radius: 9px;
+            margin: 12px 9px 14px;
+            background: linear-gradient(90deg,
+                    #1e2c55 22%,
+                    #f3c63d 32%,
+                    #f8e28c 50%,
+                    #f3c63d 68%,
+                    #1e2c55 78%);
+        }
+
+        .dy i {
+            position: absolute;
+            top: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--ink);
+            transform: translateX(-50%);
+        }
+
+        .pi {
+            background: #f7dd6e;
+            color: #3a3010;
+            padding: 14px 16px 18px;
+            margin: 20px 4px 18px;
+            font-size: 25px;
+            line-height: 1.12;
+            transform: rotate(1.2deg);
+            box-shadow: 0 10px 10px -8px rgba(0, 0, 0, 0.5);
+        }
+
+        .join {
+            display: block;
+            margin: 0 auto;
+            border: 0;
+            background: var(--tape);
+            color: var(--ink);
+            padding: 15px 30px;
+            font-weight: 800;
+            font-size: 17px;
+            transform: rotate(-1deg);
+        }
+
+        .join[disabled] {
+            opacity: 0.65;
+            cursor: default;
+        }
+
+        .nb {
+            position: relative;
+            background: #fdfcf8 repeating-linear-gradient(to bottom,
+                    transparent 0 31px,
+                    #b8d3ee 31px 32px) 0 12px;
+            color: var(--ink);
+            padding: 18px 18px 22px 64px;
+            border-radius: 3px;
+            box-shadow: 0 12px 22px -10px rgba(0, 0, 0, 0.55);
+            transform: rotate(-0.4deg);
+        }
+
+        .nb::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            width: 2px;
+            background: #e48a84;
+        }
+
+        .rw {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            min-height: 64px;
+        }
+
+        .no {
+            position: absolute;
+            left: -54px;
+            top: 50%;
+            width: 34px;
+            height: 34px;
+            margin-top: -17px;
+            display: grid;
+            place-items: center;
+            font:
+                700 28px/1 Caveat,
+                cursive;
+            color: #5a6070;
+        }
+
+        .no.c {
+            color: #d6403a;
+            border: 2.5px solid #d6403a;
+            border-radius: 55% 45% 52% 48%/48% 55% 45% 52%;
+        }
+
+        .rw .nm {
+            font-size: 30px;
+            line-height: 1;
+        }
+
+        .rw.mine .nm {
+            text-decoration: underline wavy #d6403a;
+            text-underline-offset: 4px;
+        }
+
+        .mk {
+            height: 15px;
+            margin-top: 3px;
+            background: rgba(243, 198, 61, 0.92);
+            border-radius: 45% 55% 50% 50%/60% 45% 55% 40%;
+            mix-blend-mode: multiply;
+            transform: rotate(-0.6deg);
+        }
+
+        .pts {
+            font-size: 30px;
+            line-height: 1;
+            text-align: right;
+        }
+
+        .pts small {
+            display: block;
+            font:
+                500 12px "Bricolage Grotesque",
+                sans-serif;
+            color: #5a6070;
+        }
+
+        .note {
+            color: var(--mut);
+            font-size: 14px;
+            margin: 18px 2px 0;
+            max-width: 62ch;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="hd">
+            <div>
+                <h1>Tour du monde</h1>
+                <p>
+                    Touche un pays pour le découvrir. Choisis le tien.
+                </p>
+            </div>
+            <div id="me"></div>
+        </div>
+        <div class="tabs">
+            <button class="tab on" data-v="p">La valise</button><button class="tab" data-v="r">Le classement</button>
+        </div>
+        <section id="vp">
+            <input type="search" id="q" placeholder="Cherche un pays ou une capitale" aria-label="Rechercher" />
+            <div class="chips" id="ch"></div>
+            <div class="grid" id="g"></div>
+        </section>
+        <section id="vr" class="hide">
+            <div class="nb" id="rk"></div>
+            <p class="note" id="rn"></p>
+        </section>
+        <p class="note">
+            Les populations sont des estimations 2025, prolongées en direct selon la
+            croissance annuelle : ce n'est pas un compteur officiel. L'heure locale
+            est calculée par ton appareil.
+        </p>
+    </main>
+    <div id="sh">
+        <div class="card">
+            <button id="x" aria-label="Fermer">×</button>
+            <div id="sb"></div>
+        </div>
+    </div>
+    <script>
+        const MAP = {
+            e: "Europe/",
+            s: "Asia/",
+            f: "Africa/",
+            a: "America/",
+            p: "Pacific/",
+            i: "Indian/",
+            t: "Atlantic/",
+            u: "Australia/",
+        };
+        const CONT = {
+            E: "Europe",
+            S: "Asie",
+            F: "Afrique",
+            A: "Amériques",
+            P: "Océanie",
+        };
+        /* code|capitale|fuseau|habitants (millions)|croissance %/an */
+        const DATA = {
+            E: `AL|Tirana|e/Tirane|2.4|-.8;AD|Andorre-la-Vieille|e/Andorra|.08|.5;AT|Vienne|e/Vienna|9.1|.3;BY|Minsk|e/Minsk|9.1|-.3;BE|Bruxelles|e/Brussels|11.8|.4;BA|Sarajevo|e/Sarajevo|3.2|-.6;BG|Sofia|e/Sofia|6.7|-.8;HR|Zagreb|e/Zagreb|3.9|-.5;CZ|Prague|e/Prague|10.9|.2;DK|Copenhague|e/Copenhagen|6|.4;EE|Tallinn|e/Tallinn|1.4|-.1;FI|Helsinki|e/Helsinki|5.6|.1;FR|Paris|e/Paris|66.5|.2;DE|Berlin|e/Berlin|84.5|.2;GR|Athènes|e/Athens|10|-.4;HU|Budapest|e/Budapest|9.6|-.3;IS|Reykjavik|t/Reykjavik|.39|.8;IE|Dublin|e/Dublin|5.3|.9;IT|Rome|e/Rome|59|-.2;LV|Riga|e/Riga|1.9|-.8;LI|Vaduz|e/Vaduz|.04|.6;LT|Vilnius|e/Vilnius|2.9|-.5;LU|Luxembourg|e/Luxembourg|.67|1.4;MT|La Valette|e/Malta|.54|.8;MD|Chisinau|e/Chisinau|2.4|-.9;MC|Monaco|e/Monaco|.04|.4;ME|Podgorica|e/Podgorica|.62|-.1;NL|Amsterdam|e/Amsterdam|18|.5;MK|Skopje|e/Skopje|1.8|-.4;NO|Oslo|e/Oslo|5.6|.7;PL|Varsovie|e/Warsaw|38.5|-.4;PT|Lisbonne|e/Lisbon|10.4|.3;RO|Bucarest|e/Bucharest|19|-.6;RU|Moscou|e/Moscow|144|-.1;SM|Saint-Marin|e/San_Marino|.034|.3;RS|Belgrade|e/Belgrade|6.6|-.6;SK|Bratislava|e/Bratislava|5.4|-.1;SI|Ljubljana|e/Ljubljana|2.1|.2;ES|Madrid|e/Madrid|48.6|.6;SE|Stockholm|e/Stockholm|10.6|.6;CH|Berne|e/Zurich|8.9|.7;UA|Kyiv|e/Kyiv|38|-1;GB|Londres|e/London|69.3|.5;VA|Vatican|e/Vatican|.0008|0`,
+            S: `AF|Kaboul|s/Kabul|43|2.3;AM|Erevan|s/Yerevan|3|-.2;AZ|Bakou|s/Baku|10.2|.4;BH|Manama|s/Bahrain|1.6|1.5;BD|Dacca|s/Dhaka|174|1.2;BT|Thimphou|s/Thimphu|.79|.6;BN|Bandar Seri Begawan|s/Brunei|.45|.8;KH|Phnom Penh|s/Phnom_Penh|17.4|1.2;CN|Pékin|s/Shanghai|1412|-.1;CY|Nicosie|s/Nicosia|1.3|.7;GE|Tbilissi|s/Tbilisi|3.7|-.1;IN|New Delhi|s/Kolkata|1450|.9;ID|Jakarta|s/Jakarta|283|.8;IR|Téhéran|s/Tehran|91|.7;IQ|Bagdad|s/Baghdad|46|2.2;IL|Jérusalem|s/Jerusalem|9.8|1;JP|Tokyo|s/Tokyo|123|-.5;JO|Amman|s/Amman|11.6|.9;KZ|Astana|s/Almaty|20.6|1.1;KW|Koweït|s/Kuwait|4.9|1.5;KG|Bichkek|s/Bishkek|7.2|1.6;LA|Vientiane|s/Vientiane|7.7|1.4;LB|Beyrouth|s/Beirut|5.4|0;MY|Kuala Lumpur|s/Kuala_Lumpur|35.6|1.1;MV|Malé|i/Maldives|.53|.2;MN|Oulan-Bator|s/Ulaanbaatar|3.5|1.4;MM|Naypyidaw|s/Yangon|54.5|.7;NP|Katmandou|s/Kathmandu|29.7|.9;KP|Pyongyang|s/Pyongyang|26.5|.4;OM|Mascate|s/Muscat|5.3|2;PK|Islamabad|s/Karachi|251|1.9;PS|Ramallah|s/Gaza|5.5|2;PH|Manille|s/Manila|115|1.5;QA|Doha|s/Qatar|2.7|.8;SA|Riyad|s/Riyadh|35.3|1.5;SG|Singapour|s/Singapore|6|.8;KR|Séoul|s/Seoul|51.7|-.1;LK|Colombo|s/Colombo|22.4|.5;SY|Damas|s/Damascus|24|2.5;TJ|Douchanbé|s/Dushanbe|10.6|2;TH|Bangkok|s/Bangkok|71.8|.1;TL|Dili|s/Dili|1.4|1.7;TR|Ankara|s/Istanbul|87.5|.5;TM|Achgabat|s/Ashgabat|6.5|1.3;AE|Abou Dabi|s/Dubai|11.3|1;UZ|Tachkent|s/Tashkent|36.8|1.5;VN|Hanoï|s/Ho_Chi_Minh|101|.8;YE|Sanaa|s/Aden|35.1|2.1`,
+            F: `DZ|Alger|f/Algiers|46.8|1.5;AO|Luanda|f/Luanda|37|3;BJ|Porto-Novo|f/Porto-Novo|14.5|2.7;BW|Gaborone|f/Gaborone|2.7|1.6;BF|Ouagadougou|f/Ouagadougou|23.5|2.5;BI|Gitega|f/Bujumbura|13.2|2.7;CV|Praia|t/Cape_Verde|.6|1;CM|Yaoundé|f/Douala|28.6|2.6;CF|Bangui|f/Bangui|5.3|1.9;TD|N'Djamena|f/Ndjamena|19|3;KM|Moroni|i/Comoro|.85|1.8;CG|Brazzaville|f/Brazzaville|6.3|2.4;CD|Kinshasa|f/Kinshasa|109|3.1;CI|Yamoussoukro|f/Abidjan|31.9|2.5;DJ|Djibouti|f/Djibouti|1.15|1.4;EG|Le Caire|f/Cairo|116|1.6;GQ|Malabo|f/Malabo|1.9|2.4;ER|Asmara|f/Asmara|3.7|1.5;SZ|Mbabane|f/Mbabane|1.2|.8;ET|Addis-Abeba|f/Addis_Ababa|130|2.5;GA|Libreville|f/Libreville|2.5|2.1;GM|Banjul|f/Banjul|2.8|2.4;GH|Accra|f/Accra|34.4|2;GN|Conakry|f/Conakry|14.8|2.4;GW|Bissau|f/Bissau|2.2|2.1;KE|Nairobi|f/Nairobi|56|2;LS|Maseru|f/Maseru|2.3|1;LR|Monrovia|f/Monrovia|5.6|2.1;LY|Tripoli|f/Tripoli|7.4|1.2;MG|Antananarivo|i/Antananarivo|31.1|2.4;MW|Lilongwe|f/Blantyre|21.5|2.5;ML|Bamako|f/Bamako|24.5|3;MR|Nouakchott|f/Nouakchott|5.2|2.6;MU|Port-Louis|i/Mauritius|1.3|0;MA|Rabat|f/Casablanca|38.1|1;MZ|Maputo|f/Maputo|34|2.7;NA|Windhoek|f/Windhoek|3|1.8;NE|Niamey|f/Niamey|27|3.7;NG|Abuja|f/Lagos|232|2.4;RW|Kigali|f/Kigali|14.3|2.2;ST|São Tomé|f/Sao_Tome|.23|1.9;SN|Dakar|f/Dakar|18.4|2.5;SC|Victoria|i/Mahe|.12|.8;SL|Freetown|f/Freetown|8.6|1.9;SO|Mogadiscio|f/Mogadishu|19|3;ZA|Pretoria|f/Johannesburg|64|.8;SS|Djouba|f/Juba|11.9|2;SD|Khartoum|f/Khartoum|49|2.5;TZ|Dodoma|f/Dar_es_Salaam|68|3;TG|Lomé|f/Lome|9.5|2.4;TN|Tunis|f/Tunis|12.3|.8;UG|Kampala|f/Kampala|50|2.8;ZM|Lusaka|f/Lusaka|21.3|2.7;ZW|Harare|f/Harare|16.6|1.9`,
+            A: `AG|Saint John's|a/Antigua|.1|.5;AR|Buenos Aires|a/Argentina/Buenos_Aires|46|.5;BS|Nassau|a/Nassau|.41|.6;BB|Bridgetown|a/Barbados|.28|.1;BZ|Belmopan|a/Belize|.41|1.5;BO|Sucre|a/La_Paz|12.4|1.4;BR|Brasilia|a/Sao_Paulo|212|.4;CA|Ottawa|a/Toronto|41.3|1;CL|Santiago|a/Santiago|19.8|.6;CO|Bogota|a/Bogota|52.9|.8;CR|San José|a/Costa_Rica|5.2|.8;CU|La Havane|a/Havana|10.9|-.3;DM|Roseau|a/Dominica|.07|.1;DO|Saint-Domingue|a/Santo_Domingo|11.4|1;EC|Quito|a/Guayaquil|18.1|1.3;SV|San Salvador|a/El_Salvador|6.3|.5;GD|Saint-Georges|a/Grenada|.12|.5;GT|Guatemala|a/Guatemala|18.4|1.5;GY|Georgetown|a/Guyana|.83|.5;HT|Port-au-Prince|a/Port-au-Prince|11.7|1.2;HN|Tegucigalpa|a/Tegucigalpa|10.6|1.5;JM|Kingston|a/Jamaica|2.8|0;MX|Mexico|a/Mexico_City|130|.8;NI|Managua|a/Managua|7|1.3;PA|Panama|a/Panama|4.5|1.4;PY|Asunción|a/Asuncion|6.9|1.2;PE|Lima|a/Lima|34.2|1;KN|Basseterre|a/St_Kitts|.05|.4;LC|Castries|a/St_Lucia|.18|.2;VC|Kingstown|a/St_Vincent|.1|-.1;SR|Paramaribo|a/Paramaribo|.63|.8;TT|Port-d'Espagne|a/Port_of_Spain|1.5|.2;US|Washington|a/New_York|342|.6;UY|Montevideo|a/Montevideo|3.4|.1;VE|Caracas|a/Caracas|28.4|.1`,
+            P: `AU|Canberra|u/Sydney|27|1.2;FJ|Suva|p/Fiji|.93|.6;KI|Tarawa-Sud|p/Tarawa|.13|1.5;MH|Majuro|p/Majuro|.04|-.5;FM|Palikir|p/Pohnpei|.11|.1;NR|Yaren|p/Nauru|.01|.5;NZ|Wellington|p/Auckland|5.3|.9;PW|Ngerulmud|p/Palau|.02|0;PG|Port Moresby|p/Port_Moresby|10.5|2;WS|Apia|p/Apia|.22|.6;SB|Honiara|p/Guadalcanal|.73|2.3;TO|Nukuʻalofa|p/Tongatapu|.1|.7;TV|Funafuti|p/Funafuti|.01|.8;VU|Port-Vila|p/Efate|.34|2.3`,
+        };
+        const FACT = {
+            FR: "Pays le plus visité au monde, avec environ 100 millions de touristes par an.",
+            BE: "Patrie de la frite et de plus de 1 000 bières.",
+            DE: "Le mur de Berlin est tombé en 1989.",
+            IT: "Un des pays qui comptent le plus de sites classés à l'UNESCO.",
+            ES: "L'espagnol est l'une des langues les plus parlées au monde.",
+            GB: "Big Ben est le nom de la cloche, pas de la tour.",
+            CH: "Quatre langues nationales : allemand, français, italien, romanche.",
+            NL: "Environ un quart du pays se trouve sous le niveau de la mer.",
+            NO: "Le soleil de minuit éclaire le nord du pays en été.",
+            IS: "Il n'y a pas de moustiques en Islande.",
+            RU: "Le plus grand pays du monde, avec 11 fuseaux horaires.",
+            CN: "La Grande Muraille mesure plus de 20 000 km.",
+            JP: "Le pays compte plus de 6 800 îles.",
+            IN: "Le pays le plus peuplé du monde.",
+            US: "Pas de langue officielle au niveau fédéral.",
+            CA: "Il possède plus de lacs que tout autre pays.",
+            MX: "Berceau du chocolat et du maïs cultivé.",
+            BR: "Il abrite la plus grande part de la forêt amazonienne.",
+            AR: "Le tango est né autour de Buenos Aires et de Montevideo.",
+            EG: "Les pyramides de Gizeh ont plus de 4 500 ans.",
+            ZA: "Trois capitales : Pretoria, Le Cap et Bloemfontein.",
+            KE: "Terre de champions de la course de fond.",
+            NG: "Le pays le plus peuplé d'Afrique.",
+            ET: "Son calendrier compte 13 mois.",
+            MA: "On y trouve l'une des plus anciennes universités du monde, fondée à Fès en 859.",
+            AU: "Il y a à peu près autant de kangourous que d'habitants.",
+            NZ: "Premier pays où les femmes ont obtenu le droit de vote, en 1893.",
+            TR: "Istanbul est à cheval sur deux continents.",
+            GR: "Berceau des Jeux olympiques et de la démocratie.",
+            PT: "Une des plus anciennes frontières stables d'Europe.",
+            SE: "Les prix Nobel y sont remis chaque année, à Stockholm.",
+            FI: "Environ 3 millions de saunas pour 5,6 millions d'habitants.",
+            PL: "Marie Curie, double prix Nobel, est née à Varsovie.",
+            UA: "Ses terres noires comptent parmi les plus fertiles du monde.",
+            SA: "Il n'y a aucune rivière permanente dans le pays.",
+            AE: "La tour Burj Khalifa à Dubaï mesure 828 m.",
+            KR: "L'alphabet coréen, le hangeul, a été créé en 1443.",
+            TH: "Le seul pays d'Asie du Sud-Est jamais colonisé.",
+            VN: "Deuxième exportateur mondial de café.",
+            ID: "Le pays compte plus de 17 000 îles.",
+            PH: "Le pays compte plus de 7 000 îles.",
+            SG: "Un pays qui est aussi une ville.",
+            NP: "Il abrite l'Everest et possède le seul drapeau national non rectangulaire.",
+            MN: "Le pays le moins densément peuplé du monde.",
+            CL: "Un pays tout en longueur : environ 4 300 km du nord au sud.",
+            PE: "Le Machu Picchu est une cité inca du XVe siècle.",
+            CO: "Un des pays les plus riches en espèces animales et végétales.",
+            CU: "Célèbre pour ses voitures américaines des années 1950.",
+            JM: "Berceau du reggae.",
+            VA: "Le plus petit État du monde, environ 0,44 km².",
+            MC: "Le deuxième plus petit État du monde.",
+            NR: "Le troisième plus petit pays du monde.",
+        };
+        const T0 = Date.UTC(2025, 6, 1),
+            $ = (s) => document.querySelector(s);
+        const norm = (s) =>
+            s
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+        const flag = (c) =>
+            String.fromCodePoint(...[...c].map((x) => 127397 + x.charCodeAt(0)));
+        const fmt = (n) => Math.round(n).toLocaleString("fr-FR");
+        const C = [];
+        for (const k in DATA)
+            DATA[k].split(";").forEach((r) => {
+                const [c, cap, tz, p, g] = r.split("|");
+                C.push({ c, cap, k, tz: MAP[tz[0]] + tz.slice(2), p: +p, g: +g });
+            });
+        const DN = new Intl.DisplayNames(["fr"], { type: "region" });
+        C.forEach((o) => {
+            o.n = o.c === "PS" ? "Palestine" : DN.of(o.c) || o.c;
+            o.f = flag(o.c);
+            o.s = norm(o.n + " " + o.cap);
+            o.h = o.c.charCodeAt(0) * 31 + o.c.charCodeAt(1);
+        });
+        [...C].sort((a, b) => b.p - a.p).forEach((o, i) => (o.r = i + 1));
+        const by = (c) => C.find((o) => o.c === c);
+        let me = { c: null },
+            seen = new Set(),
+            cur = null,
+            cont = "",
+            votes = null,
+            db = null,
+            myId = null,
+            dbw = false;
+        try {
+            const s = JSON.parse(localStorage.getItem("ma") || "{}");
+            me.c = s.c || null;
+            seen = new Set(s.seen || []);
+        } catch { }
+        const lvl = () => 1 + Math.floor(seen.size / 5);
+        function save() {
+            try {
+                localStorage.setItem(
+                    "ma",
+                    JSON.stringify({ c: me.c, seen: [...seen] }),
+                );
+            } catch { }
+            if (dbw && myId && me.c)
+                db.doc("votes/" + myId)
+                    .set({ c: me.c, xp: seen.size })
+                    .catch(() => { });
+        }
+        function drawMe() {
+            const o = me.c && by(me.c);
+            $("#me").innerHTML =
+                '<div class="tag">' +
+                (o
+                    ? `<div class="r1"><span class="fl sk" style="font-size:46px;--r:-4deg">${o.f}</span><div><div class="hw big">Équipe ${o.n}</div><div class="sm">Niveau ${lvl()}</div></div></div><div class="sm">${seen.size} pays découverts sur ${C.length}</div>`
+                    : `<div class="hw big" style="margin-bottom:6px">D'où viens-tu ?</div><div class="sm">Touche ton drapeau, puis rejoins ton équipe. Chaque pays découvert fait monter ton niveau.</div>`) +
+                "</div>";
+        }
+        function drawGrid() {
+            const q = norm($("#q").value.trim());
+            $("#g").innerHTML = C.filter(
+                (o) => (!cont || o.k === cont) && (!q || o.s.includes(q)),
+            )
+                .sort((a, b) => a.n.localeCompare(b.n, "fr"))
+                .map(
+                    (o) =>
+                        `<button class="t${seen.has(o.c) ? " seen" : ""}${o.c === me.c ? " mine" : ""}" data-c="${o.c}"><span class="w"><span class="fl sk" style="--r:${(o.h % 7) - 3}deg;font-size:${50 + (o.h % 3) * 4}px">${o.f}</span></span><span class="nm">${o.n}</span></button>`,
+                )
+                .join("");
+        }
+        function drawChips() {
+            $("#ch").innerHTML = [["", "Tous"]]
+                .concat(Object.entries(CONT))
+                .map(
+                    ([k, v]) =>
+                        `<button class="chip${k === cont ? " on" : ""}" data-k="${k}">${v}</button>`,
+                )
+                .join("");
+        }
+        function drawRank() {
+            const m = {};
+            if (votes)
+                votes.forEach((v) => {
+                    if (!v.c || !by(v.c)) return;
+                    const t = m[v.c] || (m[v.c] = { n: 0, x: 0 });
+                    t.n++;
+                    t.x += +v.xp || 0;
+                });
+            else if (me.c) m[me.c] = { n: 1, x: seen.size };
+            const L = Object.entries(m)
+                .map(([c, t]) => ({ c, n: t.n, pw: t.n * 100 + t.x }))
+                .sort((a, b) => b.pw - a.pw)
+                .slice(0, 10),
+                mx = L[0] ? L[0].pw : 1;
+            $("#rk").innerHTML = L.length
+                ? L.map((t, i) => {
+                    const o = by(t.c);
+                    return `<div class="rw${t.c === me.c ? " mine" : ""}"><span class="no${i < 3 ? " c" : ""}">${i + 1}</span><span class="fl sk" style="font-size:34px">${o.f}</span><div><div class="hw nm">${o.n}</div><div class="mk" style="width:${Math.max(6, (t.pw / mx) * 100)}%"></div></div><div class="hw pts">${fmt(t.pw)} pts<small>${t.n} joueur${t.n > 1 ? "s" : ""}</small></div></div>`;
+                }).join("")
+                : '<p class="hw" style="font-size:28px;line-height:1.1;margin:8px 0">Aucune équipe pour l\'instant. Sois le premier à rejoindre la tienne !</p>';
+            $("#rn").textContent = !db
+                ? "Mode solo : ton équipe est enregistrée sur cet appareil. Le classement partagé s'active quand tu ouvres la page connecté(e) via le lien partagé."
+                : !dbw
+                    ? "Lecture seule : demande à la personne qui a partagé la page de te donner le rôle « Contributeur » pour rejoindre le classement."
+                    : "Tous ceux qui ont la page voient ce classement en direct. Une équipe gagne 100 points par joueur, plus 1 point par pays découvert.";
+        }
+        function tick() {
+            if (!cur) return;
+            const d = new Date(),
+                o = { timeZone: cur.tz };
+            try {
+                $("#tm").textContent = d.toLocaleTimeString("fr-FR", {
+                    ...o,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                });
+                $("#dt").textContent = d.toLocaleDateString("fr-FR", {
+                    ...o,
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                });
+                const h =
+                    +d.toLocaleString("en-GB", {
+                        ...o,
+                        hour: "2-digit",
+                        hour12: false,
+                    }) % 24,
+                    mn = +d.toLocaleString("en-GB", { ...o, minute: "2-digit" });
+                $("#dn").textContent = h >= 7 && h < 20 ? "jour" : "nuit";
+                $("#mk").style.left = ((h + mn / 60) / 24) * 100 + "%";
+                const z = new Intl.DateTimeFormat("fr-FR", {
+                    ...o,
+                    timeZoneName: "shortOffset",
+                })
+                    .formatToParts(d)
+                    .find((x) => x.type === "timeZoneName");
+                $("#ut").textContent = z ? "(" + z.value + ")" : "";
+            } catch {
+                $("#tm").textContent = "—";
+            }
+            $("#pp").textContent = fmt(
+                cur.p *
+                1e6 *
+                Math.pow(1 + cur.g / 100, (Date.now() - T0) / 31557600000),
+            );
+        }
+        function openC(c) {
+            cur = by(c);
+            if (!seen.has(c)) {
+                seen.add(c);
+                save();
+                drawMe();
+                drawGrid();
+            }
+            const o = cur,
+                fact =
+                    FACT[c] ||
+                    `${o.cap} est la capitale. ${o.n} est le ${o.r}e pays le plus peuplé de la liste, sur ${C.length}.`;
+            $("#sb").innerHTML =
+                `<div class="pol"><div class="ph"><span class="fl">${o.f}</span></div><b class="hw">${o.n}</b></div>
+ <div class="ln"><span>Capitale</span><b>${o.cap}</b></div>
+ <div class="ln"><span>Heure locale</span><b class="big" id="tm">…</b></div>
+ <div class="ln"><span id="dt">…</span><b>Il fait <span id="dn"></span> <small id="ut" class="sm"></small></b></div>
+ <div class="dy"><i id="mk"></i></div>
+ <div class="ln"><span>Habitants en ce moment</span><b id="pp">…</b></div>
+ <div class="ln"><span>Croissance par an</span><b>${o.g > 0 ? "+" : ""}${String(o.g).replace(".", ",")} %</b></div>
+ <div class="ln"><span>Rang par population</span><b>${o.r}e sur ${C.length}</b></div>
+ <div class="pi hw">${fact}</div>
+ <button class="join" id="jn" ${me.c === c ? "disabled" : ""}>${me.c === c ? "Ton équipe" : "Rejoindre l'équipe " + o.n}</button>`;
+            $("#sh").classList.add("on");
+            tick();
+            $("#jn").onclick = () => {
+                me.c = c;
+                save();
+                drawMe();
+                drawGrid();
+                drawRank();
+                openC(c);
+            };
+        }
+        $("#g").onclick = (e) => {
+            const b = e.target.closest(".t");
+            if (b) openC(b.dataset.c);
+        };
+        $("#ch").onclick = (e) => {
+            const b = e.target.closest(".chip");
+            if (b) {
+                cont = b.dataset.k;
+                drawChips();
+                drawGrid();
+            }
+        };
+        $("#q").oninput = drawGrid;
+        $("#x").onclick = () => {
+            $("#sh").classList.remove("on");
+            cur = null;
+        };
+        $("#sh").onclick = (e) => {
+            if (e.target.id === "sh") $("#x").click();
+        };
+        document.onkeydown = (e) => {
+            if (e.key === "Escape") $("#x").click();
+        };
+        document.querySelectorAll(".tab").forEach(
+            (b) =>
+            (b.onclick = () => {
+                document
+                    .querySelectorAll(".tab")
+                    .forEach((x) => x.classList.toggle("on", x === b));
+                $("#vp").classList.toggle("hide", b.dataset.v !== "p");
+                $("#vr").classList.toggle("hide", b.dataset.v !== "r");
+                drawRank();
+            }),
+        );
+        setInterval(tick, 500);
+        drawMe();
+        drawChips();
+        drawGrid();
+        drawRank();
+        /* Fonctions partagées : s'activent seulement si la page les reçoit */
+        (async () => {
+            const use = (n) =>
+                window.claude && window.claude.use
+                    ? window.claude.use(n).catch(() => null)
+                    : Promise.resolve(null);
+            const [U, D] = await Promise.all([use("user"), use("db")]);
+            if (!D) return;
+            db = D;
+            try {
+                myId = U ? await U.id() : null;
+                const w = U ? await U.can("data.write") : null;
+                dbw = !!myId && w !== false;
+            } catch { }
+            db.collection("votes").onSnapshot(
+                (s) => {
+                    votes = s.docs.map((d) => d.data());
+                    drawRank();
+                },
+                () => {
+                    db = null;
+                    votes = null;
+                    drawRank();
+                },
+            );
+            if (dbw && me.c) save();
+            drawRank();
+        })();
+    </script>
+</body>
+
+</html>
